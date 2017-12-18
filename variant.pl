@@ -53,7 +53,7 @@ my $DALLIANCE_DATA_DIR_URI = $config->DALLIANCE_DATA_DIR_URI();
 
 my $DATABASES_PATH = $config->DATABASES_PATH();
 
-my @styles = ($CSS_PATH.'w3.css', $CSS_DEFAULT, $CSS_PATH.'fullsize/fullsize.css', $CSS_PATH.'jquery.alerts.css', $CSS_PATH.'datatables.min.css');
+my @styles = ($CSS_PATH.'font-awesome.min.css', $CSS_PATH.'w3.css', $CSS_DEFAULT, $CSS_PATH.'fullsize/fullsize.css', $CSS_PATH.'jquery.alerts.css', $CSS_PATH.'datatables.min.css');
 
 my $q = new CGI;
 
