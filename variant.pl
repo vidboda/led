@@ -53,7 +53,7 @@ my $DALLIANCE_DATA_DIR_URI = $config->DALLIANCE_DATA_DIR_URI();
 
 my $DATABASES_PATH = $config->DATABASES_PATH();
 
-my @styles = ($CSS_DEFAULT, $CSS_PATH.'fullsize/fullsize.css', $CSS_PATH.'jquery.alerts.css', $CSS_PATH.'datatables.min.css');
+my @styles = ($CSS_PATH.'w3.css', $CSS_DEFAULT, $CSS_PATH.'fullsize/fullsize.css', $CSS_PATH.'jquery.alerts.css', $CSS_PATH.'datatables.min.css');
 
 my $q = new CGI;
 
@@ -112,6 +112,8 @@ if ($q->param('var') && $q->param('var') =~ /(\d+)/o) {
 	if ($rs) {$rs = "rs$rs"}	
 	if ($pos38 ne '') {($assembly, $pos) = ('hg38', $pos38, '38')}
 	
+	print $q->start_div({'class' => 'w3-light-grey'}), $q->span({'id' => 'openNav', 'class' =>'w3-button w3-blue w3-xlarge', 'onclick' => 'w3_open()', 'title' => 'Click here to open the menu of useful external links', 'style' => 'visibility:visible'}, '&#9776;'), $q->end_div(), "\n";
+	
 	#my $pos_end = $pos;
 	my $size = 1;
 	my $highlight_start = $pos; #to highlight dalliance later and ucsc
@@ -119,7 +121,7 @@ if ($q->param('var') && $q->param('var') =~ /(\d+)/o) {
 	my $highlight_end = $highlight_start+$size;
 	my ($dal_start, $dal_stop, ) = ($highlight_start-50, $highlight_start+50);
 	
-	print $q->start_p({'class' => 'title'}), $q->big("Variant $assembly:chr$chr:$pos$ref/$alt, first seen on $creation:"), $q->end_p();
+	#print $q->start_p({'class' => 'title'}), $q->big("Variant $assembly:chr$chr:$pos$ref/$alt, first seen on $creation:"), $q->end_p();
 	# number of samples
 	my $query = "SELECT COUNT(DISTINCT(patient_id)) as a FROM Variant2Patient WHERE variant_id = '$id';";
 	my $res = $dbh->selectrow_hashref($query);
@@ -140,35 +142,47 @@ if ($q->param('var') && $q->param('var') =~ /(\d+)/o) {
 	my $sth = $dbh->prepare($query);
 	my $res = $sth->execute();
 	if ($res ne '0E0') {
-		print $q->br(),
-			$q->start_ul({'class' => 'menu_left ombre appear', 'id' => 'smart_menu'}), "\n";
+		print				$q->start_div({'class' => 'w3-sidebar w3-bar-block w3-card w3-animate-left w3-light-grey', 'id' => 'smart_menu', 'style' => 'display:none;z-index:1111;width:15%;'}),
+				$q->span({'class' => 'w3-bar-item w3-button w3-large w3-border-bottom w3-xlarge', 'onclick' => 'w3_close()'}, 'Close &times;');
+		#print $q->br(),
+			#$q->start_ul({'class' => 'menu_left ombre appear', 'id' => 'smart_menu'}), "\n";
 			my $ucsc_end = $highlight_end;
 			if ($highlight_end-$highlight_start == 1) {$ucsc_end = $highlight_start}#ucsc end differs from dalliance
 			
 			my $ucsc_link = "http://genome-euro.ucsc.edu/cgi-bin/hgTracks?db=$assembly&position=chr$chr%3A".($highlight_start-10)."-".($ucsc_end+10)."&hgS_doOtherUser=submit&hgS_otherUserName=david.baux&hgS_otherUserSessionName=U2&ruler=full&knownGene=full&refGene=full&pubs=pack&lovd=pack&hgmd=pack&cons100way=full&snp144=dense&ucscGenePfam=full&omimGene2=full&tgpPhase1=dense&tgpPhase3=dense&evsEsp6500=dense&exac=dense&dgvPlus=dense&allHg19RS_BW=full&highlight=hg19.chr$chr%3A$highlight_start-$ucsc_end";
-			print $q->start_li(), $q->start_a({'href' => $ucsc_link, 'target' => '_blank'}), $q->img({'src' => $HTDOCS_PATH.'data/img/buttons/ucsc_button.png'}), $q->end_a(),
-			$q->end_li(), "\n";
+			print $q->a({'href' => $ucsc_link, 'target' => '_blank', 'class' => 'w3-bar-item w3-button w3-large w3-hover-blue w3-border-bottom w3-xlarge'}, 'UCSC'), "\n";
+			#print $q->start_li(), $q->start_a({'href' => $ucsc_link, 'target' => '_blank'}), $q->img({'src' => $HTDOCS_PATH.'data/img/buttons/ucsc_button.png'}), $q->end_a(),
+			#$q->end_li(), "\n";
 		if ($rs) {
-			print $q->start_li(), $q->start_a({'href' => "http://www.ncbi.nlm.nih.gov/SNP/snp_ref.cgi?rs=$rs", 'target' => '_blank'}), $q->img({'src' => $HTDOCS_PATH.'data/img/buttons/dbsnp_button.png'}), $q->end_a(),
-			$q->end_li(), "\n",
-			$q->start_li(), $q->start_a({'href' => "http://www.ncbi.nlm.nih.gov/clinvar?term=".$rs."[varid]", 'target' => '_blank'}), $q->img({'src' => $HTDOCS_PATH.'data/img/buttons/clinvar_button.png'}), $q->end_a(),
-			$q->end_li(), "\n";
+			#print $q->start_li(), $q->start_a({'href' => "http://www.ncbi.nlm.nih.gov/SNP/snp_ref.cgi?rs=$rs", 'target' => '_blank'}), $q->img({'src' => $HTDOCS_PATH.'data/img/buttons/dbsnp_button.png'}), $q->end_a(),
+			#$q->end_li(), "\n",
+			print $q->a({'href' => "http://www.ncbi.nlm.nih.gov/clinvar?term=".$rs."[varid]", 'target' => '_blank', 'class' => 'w3-bar-item w3-button w3-large w3-hover-blue w3-border-bottom w3-xlarge'}, 'dbSNP'), "\n";
+			#$q->start_li(), $q->start_a({'href' => "http://www.ncbi.nlm.nih.gov/clinvar?term=".$rs."[varid]", 'target' => '_blank'}), $q->img({'src' => $HTDOCS_PATH.'data/img/buttons/clinvar_button.png'}), $q->end_a(),
+			#$q->end_li(), "\n";
 		}
-		print $q->start_li(),
-			$q->start_a({'href' => "http://evs.gs.washington.edu/EVS/PopStatsServlet?searchBy=chromosome&chromosome=$chr&chromoStart=".($pos-5)."&chromoEnd=".($pos+5)."&x=0&y=0", 'target' => '_blank'}), $q->img({'src' => $HTDOCS_PATH.'data/img/buttons/EVS_button.png'}), $q->end_a(),
-			$q->end_li(), "\n",
-			$q->start_li(),
-				$q->start_a({'href' => "http://gnomad.broadinstitute.org/variant/$chr-$pos-$ref-$alt", 'target' => '_blank'}), $q->img({'src' => $HTDOCS_PATH.'data/img/buttons/gnomad_button.png'}), $q->end_a(),
-			$q->end_li(), "\n",
-			$q->start_li(),
-				$q->start_a({'href' => "http://www.mutationtaster.org/cgi-bin/MutationTaster/MT_ChrPos.cgi?chromosome=$chr&position=$pos&ref=$ref&alt=$alt", 'target' => '_blank'}), $q->img({'src' => $HTDOCS_PATH.'data/img/buttons/mut_taster_button.png'}), $q->end_a(),
-			$q->end_li(), "\n";
-			
-		print	$q->end_ul(), "\n",
-			$q->big({'class' => 'gras decale'}, "We have currently $samples distinct samples carrying this variant coming from $family families."),$q->br(),$q->br(),"\n",
-			#$q->big({'class' => 'pointer title decale', 'onclick' => '$("#var_details").toggle(500)'}, 'Click to show/hide the patients table.'),"\n", #removed $limit_text line above after families 11/2016
+		print $q->a({'href' => "http://evs.gs.washington.edu/EVS/PopStatsServlet?searchBy=chromosome&chromosome=$chr&chromoStart=".($pos-5)."&chromoEnd=".($pos+5)."&x=0&y=0", 'target' => '_blank', 'class' => 'w3-bar-item w3-button w3-large w3-hover-blue w3-border-bottom w3-xlarge'}, 'EVS'), "\n";
+		#print $q->start_li(),
+			#$q->start_a({'href' => "http://evs.gs.washington.edu/EVS/PopStatsServlet?searchBy=chromosome&chromosome=$chr&chromoStart=".($pos-5)."&chromoEnd=".($pos+5)."&x=0&y=0", 'target' => '_blank'}), $q->img({'src' => $HTDOCS_PATH.'data/img/buttons/EVS_button.png'}), $q->end_a(),
+			#$q->end_li(), "\n",
+			#$q->start_li(),
+			#	$q->start_a({'href' => "http://gnomad.broadinstitute.org/variant/$chr-$pos-$ref-$alt", 'target' => '_blank'}), $q->img({'src' => $HTDOCS_PATH.'data/img/buttons/gnomad_button.png'}), $q->end_a(),
+			#$q->end_li(), "\n",
+		print $q->a({'href' => "http://gnomad.broadinstitute.org/variant/$chr-$pos-$ref-$alt", 'target' => '_blank', 'class' => 'w3-bar-item w3-button w3-large w3-hover-blue w3-border-bottom w3-xlarge'}, 'gnomAD'), "\n";	
+			#$q->start_li(),
+			#	$q->start_a({'href' => "http://www.mutationtaster.org/cgi-bin/MutationTaster/MT_ChrPos.cgi?chromosome=$chr&position=$pos&ref=$ref&alt=$alt", 'target' => '_blank'}), $q->img({'src' => $HTDOCS_PATH.'data/img/buttons/mut_taster_button.png'}), $q->end_a(),
+			#$q->end_li(), "\n",
+			#$q->end_ul(), "\n";
+		print $q->a({'href' => "http://www.mutationtaster.org/cgi-bin/MutationTaster/MT_ChrPos.cgi?chromosome=$chr&position=$pos&ref=$ref&alt=$alt", 'target' => '_blank', 'class' => 'w3-bar-item w3-button w3-large w3-hover-blue w3-border-bottom w3-xlarge'}, 'Mutation Taster'), "\n",
+		$q->end_div();
+		print $q->start_p({'class' => 'title'}), $q->big("Variant $assembly:chr$chr:$pos$ref/$alt, first seen on $creation:"), $q->end_p();
+		my $text = $q->span({'class' => 'w3-large'}, "We have currently $samples distinct samples carrying this variant coming from $family families.");
+		print $q->start_div({'class' => 'decale fitin'}).modules::subs::mini_info_panel($text, $q).$q->end_div()."\n";
+			#print modules::subs::mini_info_panel($text, $q);
+		#print	$q->end_ul(), "\n";
+		#	$q->big({'class' => 'gras decale'}, "We have currently $samples distinct samples carrying this variant coming from $family families."),$q->br(),$q->br(),"\n",
+		print $q->big({'class' => 'pointer title decale', 'onclick' => '$("#var_details").toggle(500)'}, 'Click to show/hide the patients table.'),"\n", #removed $limit_text line above after families 11/2016
 			$q->start_div({'class' => 'decale fitin', 'id' => 'var_details'}), "\n", $q->br(), $q->br(),
-			$q->start_table({'class' => 'technical great_table', 'id' => 'var_in_patients'}), $q->caption("$samples distinct samples carrying the variant from $family families:"), $q->start_thead(),
+				$q->start_table({'class' => 'technical great_table', 'id' => 'var_in_patients'}), $q->caption("$samples distinct samples carrying the variant from $family families:"), $q->start_thead(),
 				$q->start_Tr(), "\n",
 					$q->th({'class' => 'left_general'}, 'Patient info (sample/familiy/disease/creation date)'), "\n",
 					$q->th({'class' => 'left_general'}, 'Experiment'), "\n",
@@ -442,13 +456,34 @@ if ($q->param('var') && $q->param('var') =~ /(\d+)/o) {
 		print $q->end_table(), $q->end_div(), "\n", $q->br(), $q->br();
 		
 		if (length($ref) == length($alt)) {#substitution only
-			print $q->start_p({'class' => 'decale fitin'}), $q->span('*Predictions extracted from '), $q->a({'href' => 'https://sites.google.com/site/jpopgen/dbNSFP', 'target' => '_blank'}, 'dbNSFP'), $q->span('. Please note that some predictors like SIFT may report multiple results coming from multiple transcripts. In this case, only the most deleterious is displayed here. For VEST3, the closer to 1, the likely to alter protein function. Interpretation: B benign, T tolerated, D deleterious.'), $q->end_p(), "\n",
-			$q->start_p({'class' => 'decale fitin'}), $q->span('**'), $q->a({'href' => 'http://nar.oxfordjournals.org/content/42/22/13534.full', 'target' => '_blank'}, 'dbscSNV'), $q->span(' is a dataset which provides access, for all variants located into identified intron/exon junctions '), $q->span({'class' => 'gras'}, '(-3 to +8 at the 5\' splice site and -12 to +2 at the 3\' splice site)'), $q->span(' to precomputed splicing alterations likelyhood scores. These scores called Random Forest (RF) or ADA depending on the learning machine used rely on both MaxEntScan and Position Weight Matrix (Shapiro) prediction scores.'), $q->br(), $q->span({'class' => 'gras'}, 'The closer to 1, the likely to disrupt splicing.'), $q->end_p(), "\n",			
-			$q->start_p({'class' => 'decale fitin'}), $q->span('***'), $q->a({'href' => 'http://www.deepgenomics.com/spidex', 'target' => '_blank'}, 'Spidex'), $q->span(' is a dataset which provide access, for all variants in and around 300bp of exons, to '), $q->a({'href' => 'http://tools.genes.toronto.edu/', 'target' => '_blank'}, 'SPANR'), $q->span(' predictions (percent inclusion ratio (PSI) of the affected exon given the wildtype and the mutant sequence).'), $q->end_p(), "\n",
-			$q->start_ul(),
-				$q->li({'class' => 'decale fitin'}, 'dPSI: The delta PSI. This is the predicted change in percent-inclusion due to the variant, reported as the maximum across tissues (in percent).'),
-				$q->li({'class' => 'decale fitin'}, 'dPSI z-score: This is the z-score of dpsi_max_tissue relative to the distribution of dPSI that are due to common SNP. 0 means dPSI equals to mean common SNP. A negative score means dPSI is less than mean common SNP dataset, positive greater.'),
-			$q->end_ul(), "\n";
+			my $text = $q->span('*Predictions extracted from ').
+				$q->a({'href' => 'https://sites.google.com/site/jpopgen/dbNSFP', 'target' => '_blank'}, 'dbNSFP').
+				$q->span('. Please note that some predictors like SIFT may report multiple results coming from multiple transcripts. In this case, only the most deleterious is displayed here. For VEST3, the closer to 1, the likely to alter protein function. Interpretation: B benign, T tolerated, D deleterious.')."\n";
+			print $q->start_div({'class' => 'decale fitin'}).modules::subs::info_panel($text, $q).$q->end_div();
+			#print $q->start_p({'class' => 'decale fitin'}), $q->span('*Predictions extracted from '), $q->a({'href' => 'https://sites.google.com/site/jpopgen/dbNSFP', 'target' => '_blank'}, 'dbNSFP'), $q->span('. Please note that some predictors like SIFT may report multiple results coming from multiple transcripts. In this case, only the most deleterious is displayed here. For VEST3, the closer to 1, the likely to alter protein function. Interpretation: B benign, T tolerated, D deleterious.'), $q->end_p(), "\n",
+			$text = $q->span('**').
+				$q->a({'href' => 'http://nar.oxfordjournals.org/content/42/22/13534.full', 'target' => '_blank'}, 'dbscSNV').
+				$q->span(' is a dataset which provides access, for all variants located into identified intron/exon junctions ').
+				$q->span({'class' => 'gras'}, '(-3 to +8 at the 5\' splice site and -12 to +2 at the 3\' splice site)').
+				$q->span(' to precomputed splicing alterations likelyhood scores. These scores called Random Forest (RF) or ADA depending on the learning machine used rely on both MaxEntScan and Position Weight Matrix (Shapiro) prediction scores.').
+				$q->br().$q->span({'class' => 'gras'}, 'The closer to 1, the likely to disrupt splicing.')."\n";
+			print $q->start_div({'class' => 'decale fitin'}).modules::subs::info_panel($text, $q).$q->end_div();
+			#print $q->start_p({'class' => 'decale fitin'}), $q->span('**'), $q->a({'href' => 'http://nar.oxfordjournals.org/content/42/22/13534.full', 'target' => '_blank'}, 'dbscSNV'), $q->span(' is a dataset which provides access, for all variants located into identified intron/exon junctions '), $q->span({'class' => 'gras'}, '(-3 to +8 at the 5\' splice site and -12 to +2 at the 3\' splice site)'), $q->span(' to precomputed splicing alterations likelyhood scores. These scores called Random Forest (RF) or ADA depending on the learning machine used rely on both MaxEntScan and Position Weight Matrix (Shapiro) prediction scores.'), $q->br(), $q->span({'class' => 'gras'}, 'The closer to 1, the likely to disrupt splicing.'), $q->end_p(), "\n",			
+			$text = $q->span('***').
+				$q->a({'href' => 'http://www.deepgenomics.com/spidex', 'target' => '_blank'}, 'Spidex').
+				$q->span(' is a dataset which provide access, for all variants in and around 300bp of exons, to ').
+				$q->a({'href' => 'http://tools.genes.toronto.edu/', 'target' => '_blank'}, 'SPANR').
+				$q->span(' predictions (percent inclusion ratio (PSI) of the affected exon given the wildtype and the mutant sequence).')."\n".
+				$q->start_ul().
+				$q->li({'class' => 'decale fitin'}, 'dPSI: The delta PSI. This is the predicted change in percent-inclusion due to the variant, reported as the maximum across tissues (in percent).').
+				$q->li({'class' => 'decale fitin'}, 'dPSI z-score: This is the z-score of dpsi_max_tissue relative to the distribution of dPSI that are due to common SNP. 0 means dPSI equals to mean common SNP. A negative score means dPSI is less than mean common SNP dataset, positive greater.').
+			$q->end_ul();
+			print $q->start_div({'class' => 'decale fitin'}).modules::subs::info_panel($text, $q).$q->end_div();
+			#$q->start_p({'class' => 'decale fitin'}), $q->span('***'), $q->a({'href' => 'http://www.deepgenomics.com/spidex', 'target' => '_blank'}, 'Spidex'), $q->span(' is a dataset which provide access, for all variants in and around 300bp of exons, to '), $q->a({'href' => 'http://tools.genes.toronto.edu/', 'target' => '_blank'}, 'SPANR'), $q->span(' predictions (percent inclusion ratio (PSI) of the affected exon given the wildtype and the mutant sequence).'), $q->end_p(), "\n",
+			#$q->start_ul(),
+			#	$q->li({'class' => 'decale fitin'}, 'dPSI: The delta PSI. This is the predicted change in percent-inclusion due to the variant, reported as the maximum across tissues (in percent).'),
+			#	$q->li({'class' => 'decale fitin'}, 'dPSI z-score: This is the z-score of dpsi_max_tissue relative to the distribution of dPSI that are due to common SNP. 0 means dPSI equals to mean common SNP. A negative score means dPSI is less than mean common SNP dataset, positive greater.'),
+			#$q->end_ul(), "\n";
 			
 		}
 		

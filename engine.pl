@@ -51,7 +51,7 @@ my $JS_PATH = $config->JS_PATH();
 my $JS_DEFAULT = $config->JS_DEFAULT();
 my $HTDOCS_PATH = $config->HTDOCS_PATH();
 
-my @styles = ($CSS_DEFAULT, $CSS_PATH.'fullsize/fullsize.css', $CSS_PATH.'jquery.alerts.css', $CSS_PATH.'datatables.min.css');
+my @styles = ($CSS_PATH.'w3.css', $CSS_DEFAULT, $CSS_PATH.'fullsize/fullsize.css', $CSS_PATH.'jquery.alerts.css', $CSS_PATH.'datatables.min.css');
 
 my $q = new CGI;
 
@@ -107,20 +107,29 @@ if ($q->param('research') && $q->param('research') =~ /(h?g?[1938]{2}):c?h?r?([\
 	my $sth = $dbh->prepare($query);
 	my $res = $sth->execute();
 	if ($res ne '0E0') {
-		print $q->br(), $q->start_big(), $q->start_p(), $q->span('Between positions '), $q->span({'class' => 'gras'}, $pos-10),$q->span(' and '), $q->span({'class' => 'gras'}, $pos+10), $q->span(' of '), $q->span({'class' => 'gras'}, "$g:chr$chr"), $q->span(', the database contains the following '), $q->span({'class' => 'gras'}, "$res variant(s):"), $q->end_p(), "\n",
-			$q->br(), "\n",
-			$q->start_ul(), "\n";
+		my $text = $q->start_div({'class' => 'w3-container w3-large'}).
+			$q->span('Between positions ').$q->span({'class' => 'gras'}, $pos-10).$q->span(' and ').$q->span({'class' => 'gras'}, $pos+10).
+			$q->span(' of ').$q->span({'class' => 'gras'}, "$g:chr$chr").
+			$q->span(', the database contains the following ').$q->span({'class' => 'gras'}, "$res variant(s):").
+			$q->end_div()."\n";
+		print modules::subs::mini_info_panel($text,$q);
+		#print $q->br(), $q->start_big(), $q->start_p(), $q->span('Between positions '), $q->span({'class' => 'gras'}, $pos-10),$q->span(' and '), $q->span({'class' => 'gras'}, $pos+10), $q->span(' of '), $q->span({'class' => 'gras'}, "$g:chr$chr"), $q->span(', the database contains the following '), $q->span({'class' => 'gras'}, "$res variant(s):"), $q->end_p(), "\n",
+		print $q->br(), "\n",
+			$q->start_div({'class' => 'w3-container', 'style' => 'width:50%'}), $q->start_ul({'class' => 'w3-ul w3-large w3-hoverable'}), "\n";
 		while (my $result = $sth->fetchrow_hashref()) {#removed param lilit &amp;limit=20 11/2016 useless
 			print $q->start_li(), $q->a({'href' => "variant.pl?var=$result->{'id'}", 'target' => '_blank'}, "$g:chr$result->{'chr'}:g.".$result->{'pos_'.$g}."$result->{'reference'}/$result->{'alternative'}");
 			if ($result->{'pos_'.$g} eq $pos) {
 				print $q->span('  <--  your query'), $q->end_li(), "\n";
 			}
 		}
-		print $q->end_ul(), "\n",
-			$q->p('Click on a variant to display the full information.');
+		print $q->end_ul(), $q->end_div();"\n";
+		print modules::subs::mini_info_panel('Click on a variant to display the full information.', $q);
+		#	$q->p('Click on a variant to display the full information.');
 	}
 	else {
-		print $q->br(), $q->start_big(), $q->p({'class' => 'gras'}, "The database does not contain any variant between positions ".($pos-10)." and ".($pos+10)." of $g:chr$chr"), "\n";
+		my $text = $q->span({'class' => 'w3-large'},"The database does not contain any variant between positions ".($pos-10)." and ".($pos+10)." of $g:chr$chr");
+		print modules::subs::danger_panel($text, $q);
+		#print $q->br(), $q->start_big(), $q->p({'class' => 'gras'}, "The database does not contain any variant between positions ".($pos-10)." and ".($pos+10)." of $g:chr$chr"), "\n";
 	}
 	print $q->end_big(), $q->br(), $q->br(), $q->br(), $q->start_div({'id' => 'farside', 'class' => 'appear center'}), $q->end_div(), "\n";
 }
@@ -140,7 +149,7 @@ elsif ($q->param('research') && $q->param('research') ne '') {#2 positions or a 
 	#if ($param =~ /^(\w+):(\w*)$/o) {#gene:patient
 	if ($gene ne '') {
 		#so we need to build to kind of pages:
-		#one with rare variants er gene (kavair < 0.01)
+		#one with rare variants per gene (gnomad < 0.01)
 		#the second with all variants per gene for a particular patient
 		#$gene = $1;
 		$gene = uc($gene);
@@ -178,8 +187,13 @@ elsif ($q->param('research') && $q->param('research') ne '') {#2 positions or a 
 	my $sth = $dbh->prepare($query);
 	my $res = $sth->execute();
 	if ($res ne '0E0') {
-		print $q->br(), $q->start_big(), $q->start_p(), $q->span('Between positions '), $q->span({'class' => 'gras'}, $pos1),$q->span(' and '), $q->span({'class' => 'gras'}, $pos2), $q->span(' of '), $q->span({'class' => 'gras'}, "$g:chr$chr $gene"), $q->span(", the database contains the following $main_text"), $q->end_p(), $q->end_big(), "\n",
-			$q->br(), "\n",
+		my $text = $q->start_big().$q->start_p().
+			$q->span('Between positions ').$q->span({'class' => 'gras'}, $pos1).$q->span(' and ').
+			$q->span({'class' => 'gras'}, $pos2).$q->span(' of ').$q->span({'class' => 'gras'}, "$g:chr$chr $gene").
+			$q->span(", the database contains the following $main_text"), $q->end_p().$q->end_big()."\n";
+		print modules::subs::mini_info_panel($text, $q);
+		#print $q->br(), $q->start_big(), $q->start_p(), $q->span('Between positions '), $q->span({'class' => 'gras'}, $pos1),$q->span(' and '), $q->span({'class' => 'gras'}, $pos2), $q->span(' of '), $q->span({'class' => 'gras'}, "$g:chr$chr $gene"), $q->span(", the database contains the following $main_text"), $q->end_p(), $q->end_big(), "\n",
+		print $q->br(), "\n",
 			$q->start_div({'class' => 'fitin decale', 'id' => 'pat_details'}), "\n", $q->br(), $q->br(),
 			$q->start_table({'class' => 'technical great_table', 'id' => 'patient_variant_table', 'data-page-length' => '25'}), $q->caption("Variants recorded in LED:"),
 				$q->start_thead(), "\n",
@@ -368,8 +382,9 @@ elsif ($q->param('research') && $q->param('research') ne '') {#2 positions or a 
 			}
 			#else {$filtered_out++}
 		}	
-		print $q->end_tbody(), "\n", $q->end_table(), $q->end_div(), "\n", $q->br(), $q->br(),
-			$q->p('* PTC: Premature Termination Codon but be careful! LED does not recognise frameshifts yet.'); 
+		print $q->end_tbody(), "\n", $q->end_table(), $q->end_div(), "\n", $q->br(), $q->br();
+		$text = '* PTC: Premature Termination Codon but be careful! LED does not recognise frameshifts yet.';
+		print modules::subs::info_panel($text, $q);
 		
 	}
 	else {
@@ -390,8 +405,10 @@ if ($q->param('patients') && $q->param('patients') == 1) {
 	my $query = "SELECT * FROM Patient ORDER BY experiment_type, team_name, family_id, patient_id;";
 	my $sth = $dbh->prepare($query);
 	my $res = $sth->execute();
-	print	$q->br(), $q->big({'class' => 'gras decale'}, "We have currently $nb_pat->{'a'} distinct samples coming from $nb_fam->{'a'} families."),$q->br(),$q->br(),"\n",
-			$q->start_div({'class' => 'fitin decale', 'id' => 'pat_details'}), "\n", $q->br(), $q->br(),
+	my $text = $q->strong("We have currently $nb_pat->{'a'} distinct samples coming from $nb_fam->{'a'} families.");
+	print modules::subs::mini_info_panel($text, $q);
+	#print	$q->br(), $q->big({'class' => 'gras decale'}, "We have currently $nb_pat->{'a'} distinct samples coming from $nb_fam->{'a'} families."),$q->br(),$q->br(),"\n",
+	print 	$q->start_div({'class' => 'fitin decale', 'id' => 'pat_details'}), "\n", $q->br(), $q->br(),
 			$q->start_table({'class' => 'technical great_table', 'id' => 'patient_table', 'data-page-length' => '25'}), $q->caption("Samples recorded in LED:"),
 			$q->start_thead(), "\n",
 				$q->start_Tr(), "\n",

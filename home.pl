@@ -49,7 +49,7 @@ my $JS_PATH = $config->JS_PATH();
 my $JS_DEFAULT = $config->JS_DEFAULT();
 my $HTDOCS_PATH = $config->HTDOCS_PATH();
 
-my @styles = ($CSS_DEFAULT, $CSS_PATH.'fullsize/fullsize.css', $CSS_PATH.'jquery.alerts.css');
+my @styles = ($CSS_PATH.'w3.css', $CSS_DEFAULT, $CSS_PATH.'fullsize/fullsize.css', $CSS_PATH.'jquery.alerts.css');
 
 my $q = new CGI;
 
@@ -108,13 +108,16 @@ my $res_var = $dbh->selectrow_hashref($query);
 
 #my $user = users->new();
 
-print $q->br(), $q->start_div({'align' => 'center'}), $q->start_p(), $q->start_big(), $q->span('Welcome to LED, the Lmg Exome Database.'), $q->br(), $q->br(), $q->span("The system currently records $res->{'a'} different (unique) variants of which $res->{'b'} are linked to dbSNP (".sprintf('%.2f',($res->{'b'}/$res->{'a'})*100)."%) and corresponding to $res_var->{'a'} cumulated variants."), $q->end_big(), $q->end_p(), "\n";#,
+print $q->br(), $q->start_div({'align' => 'center'}), $q->h2('Welcome to LED, the Lmg Exome Database.'), $q->br(), $q->br(),
+	$q->span({'class' => 'w3-badge w3-xxxlarge w3-blue'}, $res->{'a'}), $q->span('unique variants '),
+	$q->span({'class' => 'w3-badge w3-xxxlarge w3-red'}, $res->{'b'}), $q->span("in dbSNP (".sprintf('%.2f',($res->{'b'}/$res->{'a'})*100)."%) "),
+	$q->span({'class' => 'w3-badge w3-xxxlarge w3-teal'},$res_var->{'a'}),  $q->span('cumulated variants.'), $q->br(), "\n";
 #	$q->p("You ".$user->isAnalystToString()." and ".$user->isValidatorToString()." and ".$user->isRefereeToString()), "\n";
 
 $query = "SELECT COUNT(id) as a FROM patient;";
 $res = $dbh->selectrow_hashref($query);
 
-print $q->start_p(), $q->start_big(), $q->span("These variants are related to $res->{'a'} patients with the pathologies and experiment types shown below:"), $q->end_big(), $q->end_p(),"\n";
+print $q->span({'class' => 'w3-badge w3-xxxlarge w3-teal'},$res->{'a'}), $q->span('patients'),"\n";
 
 #$query = "SELECT COUNT(id) as a, disease_name FROM Patient GROUP BY disease_name;";
 print $q->start_table({'class' => 'zero_table'}), $q->start_Tr(), $q->start_td(),"\n";
@@ -123,28 +126,42 @@ print $q->start_table({'class' => 'zero_table'}), $q->start_Tr(), $q->start_td()
 print $q->end_td(), $q->start_td(),"\n";
 #SELECT COUNT(DISTINCT patient_id) as a, experiment_type FROM Variant2patient GROUP BY experiment_type; old school
 &table('Experiments', 'SELECT COUNT(DISTINCT patient_id) as a, experiment_type FROM Patient GROUP BY experiment_type;', 'experiment_type');
-print $q->end_td(), $q->end_Tr(), $q->end_table(),$q->br(),"\n",
-	$q->start_div(),"\n",
-	$q->span('Example research for search engine:'), 
-		$q->start_ul({'id' => 'example'}),
-			$q->li('\'hg19:chr1:977330\' or'),
-			$q->li('\'19:1:977330\' or'),
-			$q->li('\'hg19:chr11:76,839,310-76,926,286\' (UCSC style, but do not forget hg19!), or'),
-			$q->li('\'19:11:76839310-76926286\' or'),
-			$q->li('\'MYO7A\' (HGNC gene name) or'),
-			$q->li('\'MYO7A:A1060\' (HGNC gene name:sampleID, do not forget : between gene and sample!) '),
-		$q->end_ul(),
-	$q->end_div(),"\n",
-	$q->end_div(), "\n",
+print $q->end_td(), $q->end_Tr(), $q->end_table(),$q->br(),"\n";
+	#$q->start_div(),"\n",
+	#$q->span('Example research for search engine:'), 
+	#	$q->start_ul({'id' => 'example'}),
+	#		$q->li('\'hg19:chr1:977330\' or'),
+	#		$q->li('\'19:1:977330\' or'),
+	#		$q->li('\'hg19:chr11:76,839,310-76,926,286\' (UCSC style, but do not forget hg19!), or'),
+	#		$q->li('\'19:11:76839310-76926286\' or'),
+	#		$q->li('\'MYO7A\' (HGNC gene name) or'),
+	#		$q->li('\'MYO7A:A1060\' (HGNC gene name:sampleID, do not forget : between gene and sample!) '),
+	#	$q->end_ul(),
+	#$q->end_div(),"\n",
+print $q->end_div(), "\n",
 	$q->start_div({'align' => 'center'}), "\n",
 		$q->start_form({'action' => '/perl/led/engine.pl', 'id' => 'engine_form'}), "\n",
-			$q->label({'for' => 'main_engine'}),
-			$q->input({'type' => 'text', 'name' => 'research', 'id' => 'main_engine', 'size' => '50', 'maxlength' => '40', 'placeholder' => ' Ask LED:', 'autofocus' => 'autofocus', 'class' => 'big_cadre'}), "\n", $q->br(), $q->br(), $q->br(),
-			$q->submit({'value' => 'Submit', 'class' => 'gras'}),
+			$q->start_div({'class' => 'w3-margin-16 w3-container', 'style' => 'width:50%'}), "\n",
+				$q->input({'type' => 'text', 'name' => 'research', 'id' => 'main_engine', 'size' => '50', 'maxlength' => '40', 'placeholder' => ' Ask LED:', 'class' => 'w3-input w3-light-grey w3-animate-input', 'style' => 'width:30%'}), "\n", $q->br(), $q->br(),
+				$q->input({'type' => 'submit', 'value' => 'Submit', 'class' => 'w3-button w3-blue'}),
+			$q->end_div(), "\n",
+			#$q->label({'for' => 'main_engine'}),
+			#$q->input({'type' => 'text', 'name' => 'research', 'id' => 'main_engine', 'size' => '50', 'maxlength' => '40', 'placeholder' => ' Ask LED:', 'autofocus' => 'autofocus', 'class' => 'big_cadre'}), "\n", $q->br(), $q->br(), $q->br(),
+			#$q->submit({'value' => 'Submit', 'class' => 'gras'}),
 		$q->end_form(), "\n",
-	$q->end_div(), "\n",
+	$q->end_div(), "\n";
+	my $text = $q->span('Example research for search engine:').
+		$q->start_ul({'id' => 'example'}).
+			$q->li('\'hg19:chr1:977330\' or').
+			$q->li('\'19:1:977330\' or').
+			$q->li('\'hg19:chr11:76,839,310-76,926,286\' (UCSC style, but do not forget hg19!), or').
+			$q->li('\'19:11:76839310-76926286\' or').
+			$q->li('\'MYO7A\' (HGNC gene name) or').
+			$q->li('\'MYO7A:A1060\' (HGNC gene name:sampleID, do not forget : between gene and sample!) ').
+		$q->end_ul();
+	print modules::subs::info_panel($text, $q);
 	#$q->br(), $q->br(), $q->start_div({'id' => 'farside', 'class' => 'appear center'}), $q->end_div(), "\n",
-	$q->br(), $q->br(), $q->start_div({'align' => 'center'}),
+	print $q->br(), $q->br(), $q->start_div({'align' => 'center'}),
 		$q->img({'width' => '200', 'height' => '150', 'src' => $HTDOCS_PATH.'data/img/led_logo.png'}), "\n", $q->br(), $q->span("Logo by Kevin Yauy."),
 	$q->end_div(),"\n",
 	$q->br(), $q->br(),
