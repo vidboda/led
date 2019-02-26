@@ -392,9 +392,25 @@ if ($q->param('var') && $q->param('var') =~ /(\d+)/o) {
 			else {print $q->td('no dbscSNV**')}
 			print $q->end_Tr(), "\n";
 			
+			my @spliceai = split(/\n/, `$DATABASES_PATH/htslib-1.2.1/tabix $DATABASES_PATH/spliceAI/exome_spliceai_scores.vcf.gz $chr:$pos-$pos`);		
+			print $q->start_Tr(), "\n",
+							$q->start_td(), $q->a({'href' => "https://www.cell.com/cell/fulltext/S0092-8674(18)31629-5", 'target' => '_blank'}, 'spliceAI***'), $q->end_td();
+			if ($spliceai[0]) {
+				foreach (@spliceai) {
+					if (/\t$ref\t$alt\t/) {
+						my @res = split(/\t/, $_);
+						$res[7] =~ s/;/ | /go;
+						print $q->td($res[7]);
+					}
+				}
+			}
+			else {print $q->td('no spliceAI***')}
+			print $q->end_Tr(), "\n";
+			
+			
 			my @spidex = split(/\n/, `$DATABASES_PATH/htslib-1.2.1/tabix $DATABASES_PATH/spidex_public_noncommercial_v1.0/spidex_public_noncommercial_v1_0.tab.gz chr$chr:$pos-$pos`);
 			print $q->start_Tr(), "\n",
-							$q->start_td(), $q->a({'href' => "http://www.deepgenomics.com/spidex", 'target' => '_blank'}, 'Spidex***'), $q->end_td();
+							$q->start_td(), $q->a({'href' => "http://www.deepgenomics.com/spidex", 'target' => '_blank'}, 'Spidex****'), $q->end_td();
 			if ($spidex[0]) {
 				foreach (@spidex) {
 					#print $_;
@@ -470,6 +486,14 @@ if ($q->param('var') && $q->param('var') =~ /(\d+)/o) {
 			print $q->start_div({'class' => 'decale fitin'}).modules::subs::info_panel($text, $q).$q->end_div();
 			#print $q->start_p({'class' => 'decale fitin'}), $q->span('**'), $q->a({'href' => 'http://nar.oxfordjournals.org/content/42/22/13534.full', 'target' => '_blank'}, 'dbscSNV'), $q->span(' is a dataset which provides access, for all variants located into identified intron/exon junctions '), $q->span({'class' => 'gras'}, '(-3 to +8 at the 5\' splice site and -12 to +2 at the 3\' splice site)'), $q->span(' to precomputed splicing alterations likelyhood scores. These scores called Random Forest (RF) or ADA depending on the learning machine used rely on both MaxEntScan and Position Weight Matrix (Shapiro) prediction scores.'), $q->br(), $q->span({'class' => 'gras'}, 'The closer to 1, the likely to disrupt splicing.'), $q->end_p(), "\n",			
 			$text = $q->span('***').
+				$q->a({'href' => 'https://www.cell.com/cell/fulltext/S0092-8674(18)31629-5', 'target' => '_blank'}, 'spliceAI').
+				$q->span(' is a dataset which provides access, for all SNVs located into an exon or near splice junctions to precomputed splice sites alterations likelyhood scores.').$q->br().
+				$q->span({'class' => 'gras'}, 'The closer to 1, the likely to disrupt splicing. ').$q->br().
+				$q->span('The second number represents the distance to the variant of the affected splice site (positive values upstream to the variant, negative downstream). A quick explanation ').
+				$q->a({'href' => 'https://github.com/Illumina/SpliceAI', 'target' => '_blank'}, 'here').
+				$q->span('. Thresholds: 0.2 (possibly alter splicing), 0.5 (likely), 0.8 (very likely).').$q->end_p()."\n";
+			print $q->start_div({'class' => 'decale fitin'}).modules::subs::info_panel($text, $q).$q->end_div();
+			$text = $q->span('****').
 				$q->a({'href' => 'http://www.deepgenomics.com/spidex', 'target' => '_blank'}, 'Spidex').
 				$q->span(' is a dataset which provide access, for all variants in and around 300bp of exons, to ').
 				$q->a({'href' => 'http://tools.genes.toronto.edu/', 'target' => '_blank'}, 'SPANR').
