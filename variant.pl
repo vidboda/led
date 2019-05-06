@@ -167,7 +167,10 @@ if ($q->param('var') && $q->param('var') =~ /(\d+)/o) {
 			#$q->start_li(),
 			#	$q->start_a({'href' => "http://gnomad.broadinstitute.org/variant/$chr-$pos-$ref-$alt", 'target' => '_blank'}), $q->img({'src' => $HTDOCS_PATH.'data/img/buttons/gnomad_button.png'}), $q->end_a(),
 			#$q->end_li(), "\n",
-		print $q->a({'href' => "http://gnomad.broadinstitute.org/variant/$chr-$pos-$ref-$alt", 'target' => '_blank', 'class' => 'w3-bar-item w3-button w3-large w3-hover-blue w3-border-bottom w3-xlarge'}, 'gnomAD'), "\n";	
+		print $q->a({'href' => "http://gnomad.broadinstitute.org/variant/$chr-$pos-$ref-$alt", 'target' => '_blank', 'class' => 'w3-bar-item w3-button w3-large w3-hover-blue w3-border-bottom w3-xlarge'}, 'gnomAD'), "\n";
+		my $grc_assembly = 'GRCh37';
+		if ($assembly eq 'hg38') {$grc_assembly = 'GRCh38'}
+		print $q->a({'href' => "https://variantvalidator.org/variantvalidation/?variant=$chr-$pos-$ref-$alt&alignment=splign&primary_assembly=$grc_assembly", 'target' => '_blank', 'class' => 'w3-bar-item w3-button w3-large w3-hover-blue w3-border-bottom w3-xlarge'}, 'VariantValidator'), "\n";	
 			#$q->start_li(),
 			#	$q->start_a({'href' => "http://www.mutationtaster.org/cgi-bin/MutationTaster/MT_ChrPos.cgi?chromosome=$chr&position=$pos&ref=$ref&alt=$alt", 'target' => '_blank'}), $q->img({'src' => $HTDOCS_PATH.'data/img/buttons/mut_taster_button.png'}), $q->end_a(),
 			#$q->end_li(), "\n",
