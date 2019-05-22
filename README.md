@@ -1,1 +1,1 @@
-USHVaM2: integrated genetics database system for the Laboratory of Molecular genetics, Montpellier University Hospital
+LED: Laboratory of molecular genetics Exome Database: integrated genetics database system for the Laboratory of Molecular Genetics, Montpellier University Hospital
