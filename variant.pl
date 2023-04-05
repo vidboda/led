@@ -44,6 +44,7 @@ my $DB = $config->DB();
 my $HOST = $config->HOST();
 my $DB_USER = $config->DB_USER();
 my $DB_PASSWORD = $config->DB_PASSWORD();
+my $EXE_PATH = $config->EXE_PATH();
 my $CSS_PATH = $config->CSS_PATH();
 my $CSS_DEFAULT = $config->CSS_DEFAULT();
 my $JS_PATH = $config->JS_PATH();
@@ -110,7 +111,7 @@ if ($q->param('var') && $q->param('var') =~ /(\d+)/o) {
 	my ($chr, $pos19, $pos38, $ref, $alt, $rs, $creation) = ($variant->{'chr'}, $variant->{'pos_hg19'}, $variant->{'pos_hg38'}, $variant->{'reference'}, $variant->{'alternative'}, $variant->{'dbsnp_rs'}, $variant->{'creation'});
 	my ($assembly, $pos, $ncbi_assembly) = ('hg19', $pos19, '37');
 	if ($rs) {$rs = "rs$rs"}	
-	if ($pos38 ne '') {($assembly, $pos) = ('hg38', $pos38, '38')}
+	if ($pos38 ne '') {($assembly, $pos, $ncbi_assembly) = ('hg38', $pos38, '38')}
 	
 	print $q->start_div({'class' => 'w3-light-grey'}), $q->span({'id' => 'openNav', 'class' =>'w3-button w3-blue w3-xlarge', 'onclick' => 'w3_open()', 'title' => 'Click here to open the menu of useful external links', 'style' => 'visibility:visible'}, '&#9776;'), $q->end_div(), "\n";
 	
@@ -177,7 +178,7 @@ if ($q->param('var') && $q->param('var') =~ /(\d+)/o) {
 			#$q->end_ul(), "\n";
 		print $q->a({'href' => "http://www.mutationtaster.org/cgi-bin/MutationTaster/MT_ChrPos.cgi?chromosome=$chr&position=$pos&ref=$ref&alt=$alt", 'target' => '_blank', 'class' => 'w3-bar-item w3-button w3-large w3-hover-blue w3-border-bottom w3-xlarge'}, 'Mutation Taster'), "\n",
 		$q->end_div();
-		print $q->start_p({'class' => 'title'}), $q->big("Variant $assembly:chr$chr:$pos$ref/$alt, first seen on $creation:"), $q->end_p();
+		print $q->start_p({'class' => 'title'}), $q->big("Variant hg19:chr$chr:$pos19$ref/$alt, hg38:chr$chr:$pos38$ref/$alt, first seen on $creation:"), $q->end_p();
 		my $text = $q->span({'class' => 'w3-large'}, "We have currently $samples distinct samples carrying this variant coming from $family families.");
 		print $q->start_div({'class' => 'decale fitin'}).modules::subs::mini_info_panel($text, $q).$q->end_div()."\n";
 			#print modules::subs::mini_info_panel($text, $q);
@@ -329,7 +330,7 @@ if ($q->param('var') && $q->param('var') =~ /(\d+)/o) {
 		
 		#dbscsnv
 		if ((length($ref) == length($alt)) && (length($ref) == 1) && (length($alt) == 1)) {#substitution only
-			my @dbnsfp = split(/\n/, `$DATABASES_PATH/htslib-1.2.1/tabix $DATABASES_PATH/dbNSFP/dbNSFP29.gz $chr:$pos-$pos`);
+			my @dbnsfp = split(/\n/, `$EXE_PATH/tabix $DATABASES_PATH/dbNSFP/dbNSFP29.gz $chr:$pos-$pos`);
 			if ($dbnsfp[0]) {
 				foreach (@dbnsfp) {
 					if (/\t$ref\t$alt\t/) {
@@ -381,7 +382,7 @@ if ($q->param('var') && $q->param('var') =~ /(\d+)/o) {
 			
 			
 			
-			my @dbscsnv = split(/\n/, `$DATABASES_PATH/htslib-1.2.1/tabix $DATABASES_PATH/dbscSNV/dbscSNV.txt.gz $chr:$pos-$pos`);			
+			my @dbscsnv = split(/\n/, `$EXE_PATH/tabix $DATABASES_PATH/dbscSNV/dbscSNV.txt.gz $chr:$pos-$pos`);			
 			print $q->start_Tr(), "\n",
 							$q->start_td(), $q->a({'href' => "https://sites.google.com/site/jpopgen/dbNSFP", 'target' => '_blank'}, 'dbscSNV**'), $q->end_td();
 			if ($dbscsnv[0]) {
@@ -395,7 +396,7 @@ if ($q->param('var') && $q->param('var') =~ /(\d+)/o) {
 			else {print $q->td('no dbscSNV**')}
 			print $q->end_Tr(), "\n";
 			
-			my @spliceai = split(/\n/, `$DATABASES_PATH/htslib-1.2.1/tabix $DATABASES_PATH/spliceAI/exome_spliceai_scores.vcf.gz $chr:$pos-$pos`);		
+			my @spliceai = split(/\n/, `$EXE_PATH/tabix $DATABASES_PATH/spliceAI/exome_spliceai_scores.vcf.gz $chr:$pos-$pos`);		
 			print $q->start_Tr(), "\n",
 							$q->start_td(), $q->a({'href' => "https://www.cell.com/cell/fulltext/S0092-8674(18)31629-5", 'target' => '_blank'}, 'spliceAI***'), $q->end_td();
 			if ($spliceai[0]) {
@@ -411,7 +412,7 @@ if ($q->param('var') && $q->param('var') =~ /(\d+)/o) {
 			print $q->end_Tr(), "\n";
 			
 			
-			my @spidex = split(/\n/, `$DATABASES_PATH/htslib-1.2.1/tabix $DATABASES_PATH/spidex_public_noncommercial_v1.0/spidex_public_noncommercial_v1_0.tab.gz chr$chr:$pos-$pos`);
+			my @spidex = split(/\n/, `$EXE_PATH/tabix $DATABASES_PATH/spidex_public_noncommercial_v1.0/spidex_public_noncommercial_v1_0.tab.gz chr$chr:$pos-$pos`);
 			print $q->start_Tr(), "\n",
 							$q->start_td(), $q->a({'href' => "http://www.deepgenomics.com/spidex", 'target' => '_blank'}, 'Spidex****'), $q->end_td();
 			if ($spidex[0]) {
@@ -427,7 +428,7 @@ if ($q->param('var') && $q->param('var') =~ /(\d+)/o) {
 			print $q->end_Tr(), "\n";
 		}
 		#cadd
-		my @cadd = split(/\n/, `$DATABASES_PATH/htslib-1.2.1/tabix $DATABASES_PATH/CADD/$cadd_data.tsv.gz $chr:$pos-$pos`);
+		my @cadd = split(/\n/, `$EXE_PATH/tabix $DATABASES_PATH/CADD/$cadd_data.tsv.gz $chr:$pos-$pos`);
 		
 		print $q->start_Tr(), "\n",
 						$q->start_td(), $q->a({'href' => "http://cadd.gs.washington.edu/", 'target' => '_blank'}, 'CADD'), $q->end_td(), $q->start_td();

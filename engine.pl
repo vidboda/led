@@ -45,6 +45,7 @@ my $DB = $config->DB();
 my $HOST = $config->HOST();
 my $DB_USER = $config->DB_USER();
 my $DB_PASSWORD = $config->DB_PASSWORD();
+my $EXE_PATH = $config->EXE_PATH();
 my $CSS_PATH = $config->CSS_PATH();
 my $CSS_DEFAULT = $config->CSS_DEFAULT();
 my $JS_PATH = $config->JS_PATH();
@@ -148,7 +149,7 @@ elsif ($q->param('research') && $q->param('research') ne '') {#2 positions or a 
 	else {print $q->p('Unrecognized query format');exit;}
 	#if ($param =~ /^(\w+):(\w*)$/o) {#gene:patient
 	if ($gene ne '') {
-		#so we need to build to kind of pages:
+		#so we need to build two kind of pages:
 		#one with rare variants per gene (gnomad < 0.01)
 		#the second with all variants per gene for a particular patient
 		#$gene = $1;
@@ -198,7 +199,8 @@ elsif ($q->param('research') && $q->param('research') ne '') {#2 positions or a 
 			$q->start_table({'class' => 'technical great_table', 'id' => 'patient_variant_table', 'data-page-length' => '25'}), $q->caption("Variants recorded in LED:"),
 				$q->start_thead(), "\n",
 				$q->start_Tr(), "\n",
-					$q->th({'class' => 'left_general'}, 'Variant'), "\n",
+					$q->th({'class' => 'left_general'}, 'Variant hg19'), "\n",
+					$q->th({'class' => 'left_general'}, 'Variant hg38'), "\n",
 					$q->th({'class' => 'left_general'}, 'Protein consequence if NS'), "\n",
 					$q->th({'class' => 'left_general'}, 'dbsnp rs'), "\n",
 					$q->th({'class' => 'left_general'}, 'gnomAD Exome/Genome AF'), "\n",
@@ -274,7 +276,7 @@ elsif ($q->param('research') && $q->param('research') ne '') {#2 positions or a 
 			#my @kaviar = split(/\n/, `$DATABASES_PATH/htslib-1.2.1/tabix $DALLIANCE_DATA_DIR_RESTRICTED_PATH/$g/kaviar/Kaviar-160204-Public-$g-trim.vcf.gz $chr:$result->{'pos_'.$g}-$result->{'pos_'.$g}`);
 			#if ($kaviar[0]) {
 			my $gnomad_file = $g."_gnomad_exome.sorted.af.vcf.gz";
-			my @gnomad = split(/\n/, `$DATABASES_PATH/htslib-1.2.1/tabix $DALLIANCE_DATA_DIR_RESTRICTED_PATH/$g/gnomad/$gnomad_file $chr:$result->{'pos_'.$g}-$result->{'pos_'.$g}`);
+			my @gnomad = split(/\n/, `$EXE_PATH/tabix $DALLIANCE_DATA_DIR_RESTRICTED_PATH/$g/gnomad/$gnomad_file $chr:$result->{'pos_'.$g}-$result->{'pos_'.$g}`);
 			if ($gnomad[0]) {
 				foreach (@gnomad) {
 					my @current = split(/\t/, $_);
@@ -341,7 +343,7 @@ elsif ($q->param('research') && $q->param('research') ne '') {#2 positions or a 
 				my $nom_prot = '';
 				if (length($result->{'reference'}) == 1 && length($result->{'alternative'}) == 1) {
 					#print "$DATABASES_PATH/htslib-1.2.1/tabix $DATABASES_PATH/dbNSFP/dbNSFP29.gz $chr:$result->{'pos_'.$g}-$result->{'pos_'.$g}";exit;
-					my @dbnsfp = split(/\n/, `$DATABASES_PATH/htslib-1.2.1/tabix $DATABASES_PATH/dbNSFP/dbNSFP29.gz $chr:$result->{'pos_'.$g}-$result->{'pos_'.$g}`);
+					my @dbnsfp = split(/\n/, `$EXE_PATH/tabix $DATABASES_PATH/dbNSFP/dbNSFP29.gz $chr:$result->{'pos_'.$g}-$result->{'pos_'.$g}`);
 					##print "$DATABASES_PATH/htslib-1.2.1/tabix $DATABASES_PATH/dbNSFP/dbNSFP29.gz $chr:$result->{'pos_'.$g}-$result->{'pos_'.$g}";#exit;
 					if ($dbnsfp[0]) {
 						foreach (@dbnsfp) {
@@ -369,7 +371,8 @@ elsif ($q->param('research') && $q->param('research') ne '') {#2 positions or a 
 				else {$found = $result->{'status_type'}}
 				
 				print $q->start_Tr(), "\n",
-					$q->start_td(), $q->a({'href' => "variant.pl?var=$result->{'id'}", 'target' => '_blank'}, "chr$chr:g.$result->{'pos_'.$g}$result->{'reference'}/$result->{'alternative'}"), $q->end_td(), "\n",
+					$q->start_td(), $q->a({'href' => "variant.pl?var=$result->{'id'}", 'target' => '_blank'}, "chr$chr:g.$result->{'pos_hg19'}$result->{'reference'}/$result->{'alternative'}"), $q->end_td(), "\n",
+					$q->td("chr$chr:g.$result->{'pos_hg38'}$result->{'reference'}/$result->{'alternative'}"), "\n",
 					$q->td($nom_prot), "\n";
 				if ($result->{'dbsnp_rs'} ne '') {
 					print $q->start_td(), $q->a({'href' => "http://www.ncbi.nlm.nih.gov/SNP/snp_ref.cgi?rs=rs$result->{'dbsnp_rs'}", 'target' => '_blank'}, "rs$result->{'dbsnp_rs'}"), $q->end_td(), "\n";

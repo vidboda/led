@@ -43,7 +43,7 @@ sub initConfig {
 		'DALLIANCE_DATA_DIR_PATH' => {ARGCOUNT => 1},
 		'DALLIANCE_DATA_DIR_RESTRICTED_PATH' => {ARGCOUNT => 1},
 		'DATABASES_PATH' => {ARGCOUNT => 1},
-		#'EXE_PATH' => {ARGCOUNT => 1},
+		'EXE_PATH' => {ARGCOUNT => 1},
 		'JS_PATH' => {ARGCOUNT => 1},
 		'JS_DEFAULT' => {ARGCOUNT => 1},
 		'CSS_PATH' => {ARGCOUNT => 1},
